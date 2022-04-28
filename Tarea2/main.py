@@ -379,17 +379,7 @@ if __name__ == '__main__':
     getImagen()
 
 
-    img = imagen.copy()
-    filtro = blur(img)
-    imagenNueva = cv2.imwrite('final.jpg',filtro)
-    res = Toplevel(ventana)
-    res.geometry('800x800')
-    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
-    resultado = Label(res, text='Filtros resultante')
-    resultado.place(x=10, y=10)
-    labelImg = Label(res, image=imgf    )
-    labelImg.place(x=50, y = 50)
-    res.mainloop()
+    
     
 
     labelImg = Label(ventana, text='hola')
@@ -427,6 +417,8 @@ if __name__ == '__main__':
     botonContraste = ['Alto contraste', 'Inverso']
     versionContraste = [0,1]
     botonesContrastes = []
+
+    
 
     for i in range(len(botonContraste)):
         boton = Button(ventana,text=botonContraste[i], command= lambda i=i: contrasteTop(imagen, versionContraste[i] ))
