@@ -1,9 +1,12 @@
+from curses.panel import bottom_panel
 from tkinter import *
 import cv2
 import math
 from PIL import Image, ImageTk
 import copy
-
+import numpy as  np
+from numpy import matrix
+import statistics
 """
 Author: Marco Antonio Orduna Avila
 
@@ -337,6 +340,657 @@ def brilloFun():
     botonAceptar = Button(top, text='Aceptar', command= lambda: brilloTop(imagen, int(scale.get()) ))
     botonAceptar.place(x = 100, y = 100 )
 
+
+def micaTop(b,g,r):
+    y,x,d = imagen.shape
+
+    for j in range(y):
+        for i in range(x):
+            imagen[j,i,0] = imagen[j,i,0] and b 
+            imagen[j,i,1] = imagen[j,i,1] and g
+            imagen[j,i,2] = imagen[j,i,2] and r 
+    return imagen
+
+def micaFun():
+    """
+    Funcion para mostrar la pantalla con la opcion para modificar el brillo
+    """
+    top = Toplevel(ventana)
+    top.geometry('400x200')
+    scaleb = Scale(top, from_=0, to=255, orient=HORIZONTAL)
+    scaleb.place(x = 50, y = 20)
+
+    scaleg = Scale(top, from_=0, to=255, orient=HORIZONTAL)
+    scaleg.place(x = 50, y = 20)
+
+    scaler = Scale(top, from_=0, to=255, orient=HORIZONTAL)
+    scaler.place(x = 50, y = 20)
+
+    botonAceptar = Button(top, text='Aceptar', command= lambda: micaTop(int(scaleb.get()), int(scaleg.get()),int(scaler.get())  ))
+    botonAceptar.place(x = 100, y = 100 )
+
+
+def calSuma(matriz):
+    blue = 0
+    green = 0
+    red = 0
+    for i in range(len(matriz)):
+        for j in range(len(matriz)):
+            blue = matriz[i][j][0] + blue
+            green = matriz[i][j][1] + green
+            red = matriz[i][j][2] + red
+            
+    return blue, green, red
+
+def blur(imagen):
+    x,y,d = imagen.shape
+    copia = imagen.copy()
+
+    matrizS = [
+        [[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]],
+        [[0,0,0],[1,1,1],[1,1,1],[1,1,1],[0,0,0]],
+        [[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]],
+        [[0,0,0],[1,1,1],[1,1,1],[1,1,1],[0,0,0]],
+        [[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]]
+    ]
+    matriz = np.array(matrizS)
+    
+    for i in range(x):
+        for j in range(y):
+            if i-(5//2) < 0 or i+(5//2)+1>x:
+                continue   
+            if j-(5//2) < 0 or j+(5//2)+1>y:
+                continue
+
+            porcion = copia[i-(5//2):i+(5//2)+1 , j-(5//2):j+(5//2)+1]
+            mul = (1/13)*matriz*porcion
+            b,g,r = calSuma(mul)
+                   
+            imagen.itemset((i,j,0),b)
+            imagen.itemset((i,j,1),g)
+            imagen.itemset((i,j,2),r)
+    return imagen
+
+
+def blurTop():
+    img = imagen.copy()
+    print("cargando")
+    filtro = blur(img)
+    print("terminado")
+    imagenNueva = cv2.imwrite('final.jpg',filtro)
+    res = Toplevel(ventana)
+    res.geometry('800x800')
+    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
+    resultado = Label(res, text='Filtros resultante')
+    resultado.place(x=10, y=10)
+    labelImg = Label(res, image=imgf    )
+    labelImg.place(x=50, y = 50)
+    res.mainloop()
+    
+
+def mediaFun():
+    top = Toplevel(ventana)
+    top.geometry('500x200')
+    
+    label = Label(top, text="Introduce la dimension de la matriz")
+    label.place(x = 10, y= 10)
+    boton3 = Button(top, text = "3", command= lambda : [mediaTop(3), top.destroy()])
+    boton3.place(x = 50, y= 60)
+    boton5 = Button(top, text = "5", command= lambda : [mediaTop(5), top.destroy()])
+    boton5.place(x = 100, y= 60)
+    boton7 = Button(top, text = "7", command= lambda : [mediaTop(7), top.destroy()])
+    boton7.place(x = 150, y= 60)
+    boton9 = Button(top, text = "9", command= lambda : [mediaTop(9), top.destroy()])
+    boton9.place(x = 200, y= 60)
+    boton11 = Button(top, text = "11", command= lambda : [mediaTop(11), top.destroy()])
+    boton11.place(x = 250, y= 60)
+
+
+def mediaTop():
+    img = imagen.copy()
+    print("cargando")
+    filtro = mediana(img)
+    print("terminado")
+    imagenNueva = cv2.imwrite('final.jpg',filtro)
+    res = Toplevel(ventana)
+    res.geometry('800x800')
+    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
+    resultado = Label(res, text='Filtros resultante')
+    resultado.place(x=10, y=10)
+    labelImg = Label(res, image=imgf    )
+    labelImg.place(x=50, y = 50)
+    res.mainloop()
+
+def motionBlur(k):
+    x,y,d = imagen.shape
+    copia = imagen.copy()
+    matrizS = []
+    for i in range(k):
+        matrizS.append([])
+        for j in range(k):
+            matrizS[i].append([])
+    
+    
+    for i in range(k):
+        for j in range(k):
+            if i == j:
+                matrizS[i][j] =  [1,1,1]
+                continue
+            matrizS[i][j] = [0,0,0]
+
+    matriz = np.array(matrizS)
+    
+    
+    for i in range(x):
+        for j in range(y):
+            if i-(k//2) < 0 or i+(k//2)+1>x:
+                        continue   
+            if j-(k//2) < 0 or j+(k//2)+1>y:
+                        continue
+            porcion = copia[i-(k//2):i+(k//2)+1 , j-(k//2):j+(k//2)+1]
+
+
+            mul = (1/k)*matriz*porcion
+            b,g,r = calSuma(mul)
+                   
+            imagen.itemset((i,j,0),b)
+            imagen.itemset((i,j,1),g)
+            imagen.itemset((i,j,2),r)
+    return imagen
+
+
+def motionTop(tamanio):
+    img = imagen.copy()
+    print("cargando")
+    filtro = motionBlur(tamanio)
+    print("terminado")
+    imagenNueva = cv2.imwrite('final.jpg',filtro)
+    res = Toplevel(ventana)
+    res.geometry('800x800')
+    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
+    resultado = Label(res, text='Filtros resultante')
+    resultado.place(x=10, y=10)
+    labelImg = Label(res, image=imgf    )
+    labelImg.place(x=50, y = 50)
+    res.mainloop()
+
+def motionFun():
+    top = Toplevel(ventana)
+    top.geometry('500x200')
+    
+    label = Label(top, text="Introduce la dimension de la matriz")
+    label.place(x = 10, y= 10)
+    boton3 = Button(top, text = "3", command= lambda : [motionTop(3), top.destroy()])
+    boton3.place(x = 50, y= 60)
+    boton5 = Button(top, text = "5", command= lambda : [motionTop(5), top.destroy()])
+    boton5.place(x = 100, y= 60)
+    boton7 = Button(top, text = "7", command= lambda : [motionTop(7), top.destroy()])
+    boton7.place(x = 150, y= 60)
+    boton9 = Button(top, text = "9", command= lambda : [motionTop(9), top.destroy()])
+    boton9.place(x = 200, y= 60)
+    boton11 = Button(top, text = "11", command= lambda : [motionTop(11), top.destroy()])
+    boton11.place(x = 250, y= 60)
+
+def findEdges(version):
+    y,x,d = imagen.shape
+    copia = imagen.copy()
+
+    matrizS = []
+
+    if version == "v":
+        for i in range(5):
+            matrizS.append([])
+            for j in range(5):
+                matrizS[i].append([])
+    
+        for i in range(5):
+            for j in range(5):
+                if i == 2 and j == 0:
+                    matrizS[i][j] =  [-1,-1,-1]
+                elif i == 2 and j == 1:
+                    matrizS[i][j] =  [-1,-1,-1]
+                elif i == 2 and j == 2: 
+                    matrizS[i][j] =  [4,4,4]
+                elif i == 2 and j == 3:
+                    matrizS[i][j] =  [-1,-1,-1]
+                elif i == 2 and j == 4:
+                    matrizS[i][j] =  [-1,-1,-1]
+                else:
+                    matrizS[i][j] = [0,0,0]
+    if version == "h":
+        for i in range(5):
+            matrizS.append([])
+            for j in range(5):
+                matrizS[i].append([])
+    
+        for i in range(5):
+            for j in range(5):
+                if i == 2 and j == 0:
+                    matrizS[i][j] =  [-1,-1,-1]
+                elif i == 2 and j == 1:
+                    matrizS[i][j] =  [-1,-1,-1]
+                elif i == 2 and j == 2: 
+                    matrizS[i][j] =  [2,2,2]
+                else:
+                    matrizS[i][j] = [0,0,0]
+    if version==45:
+        for i in range(5):
+            matrizS.append([])
+            for j in range(5):
+                matrizS[i].append([])
+    
+        for i in range(5):
+            for j in range(5):
+                if i == 0 and j == 0:
+                    matrizS[i][j] =  [-1,-1,-1]
+                elif i == 1 and j == 1:
+                    matrizS[i][j] =  [-2,-2,-2]
+                elif i == 2 and j == 2: 
+                    matrizS[i][j] =  [6,6,6]
+                elif i == 2 and j == 3:
+                    matrizS[i][j] =  [-2,-2,-2]
+                elif i == 2 and j == 4:
+                    matrizS[i][j] =  [-1,-1,-1]
+                else:
+                    matrizS[i][j] = [0,0,0]
+
+    if version == "t":
+        for i in range(3):
+            matrizS.append([])
+            for j in range(3):
+                matrizS[i].append([])
+        for i in range(3):
+            for j in range(3):
+                if i == 1 and j == 1:
+                    matrizS[i][j] =  [8,8,8]
+                else:
+                    matrizS[i][j] = [-1,-1,-1]   
+    
+    matriz = np.array(matrizS)
+    k = 3 if version == "t" else 5
+    for j in range(y):
+        for i in range(x):
+            if i-(k//2) < 0 or i+(k//2)+1>x:
+                        continue   
+            if j-(k//2) < 0 or j+(k//2)+1>y:
+                        continue
+            porcion = copia[j-(k//2):j+(k//2)+1,   i-(k//2):i+(k//2)+1 ]
+            mul = matriz*porcion
+            b,g,r = calSuma(mul)
+            minimo = min(b,g,r)
+            maximo = max(b,g,r)
+            if  minimo<0:
+                diferencia = -1 * minimo
+                b = b+diferencia
+                g = g+diferencia
+                r = r+diferencia            
+            if  maximo>255:
+                diferencia = maximo -255
+                b = b-diferencia
+                g = g-diferencia
+                r = r-diferencia
+            imagen.itemset((j,i,0),b)
+            imagen.itemset((j,i,1),g)
+            imagen.itemset((j,i,2),r)
+
+    return imagen
+
+def funTop(version):
+    img = imagen.copy()
+    print("cargando")
+    filtro = findEdges(version)
+    print("terminado")
+    imagenNueva = cv2.imwrite('final.jpg',filtro)
+    res = Toplevel(ventana)
+    res.geometry('800x800')
+    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
+    resultado = Label(res, text='Filtros resultante')
+    resultado.place(x=10, y=10)
+    labelImg = Label(res, image=imgf    )
+    labelImg.place(x=50, y = 50)
+    res.mainloop()
+
+def funFind():
+    top = Toplevel(ventana)
+    top.geometry('500x300')
+    
+    label = Label(top, text="Escoge el algoritmo de buscar aristas")
+    label.place(x = 10, y= 10)
+    boton3 = Button(top, text = "vertical", command= lambda : [funTop("v"), top.destroy()])
+    boton3.place(x = 10, y= 60)
+    boton5 = Button(top, text = "horizontal", command= lambda : [funTop("h"), top.destroy()])
+    boton5.place(x = 10, y= 110)
+    boton7 = Button(top, text = "45 grados", command= lambda : [funTop(45), top.destroy()])
+    boton7.place(x = 10, y= 160)
+    boton9 = Button(top, text = "En todas las direcciones", command= lambda : [funTop("t"), top.destroy()])
+    boton9.place(x = 10, y= 210)
+
+
+def sharpen(version):
+    y,x,d = imagen.shape
+
+    copia = imagen.copy()
+    matrizS = []
+    if version == 5:
+        matrizS = [
+            [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]],
+            [[-1,-1,-1],[2,2,2],[2,2,2],[2,2,2],[-1,-1,-1]],
+            [[-1,-1,-1],[2,2,2],[8,8,8],[2,2,2],[-1,-1,-1]],
+            [[-1,-1,-1],[2,2,2],[2,2,2],[2,2,2],[-1,-1,-1]],
+            [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]]
+        ]
+    
+    if version == 3:
+        for i in range(3):
+            matrizS.append([])
+            for j in range(3):
+                matrizS[i].append([])
+        for i in range(3):
+            for j in range(3):
+                if i == 1 and j ==1:
+                    matrizS[i][j] = [9,9,9]
+                else:
+                    matrizS[i][j] = [-1,-1,-1]        
+
+    matriz = np.array(matrizS)
+
+    k = 3 if version==3 else 5
+
+    for j in range(y):
+        for i in range(x):
+            if i-(k//2) < 0 or i+(k//2)+1>x:
+                        continue   
+            if j-(k//2) < 0 or j+(k//2)+1>y:
+                        continue
+            porcion = copia[j-(k//2):j+(k//2)+1,   i-(k//2):i+(k//2)+1 ]
+            mul = (1/8)*matriz*porcion if version == 5 else  matriz*porcion
+            
+            b,g,r = calSuma(mul)
+
+            minimo = min(b,g,r)
+            maximo = max(b,g,r)
+            if  minimo<0:
+                diferencia = -1 * minimo
+                b = b+diferencia
+                g = g+diferencia
+                r = r+diferencia
+
+            if  maximo>255:
+                diferencia = maximo -255
+                b = b-diferencia
+                g = g-diferencia
+                r = r-diferencia
+
+            imagen.itemset((j,i,0),b)
+            imagen.itemset((j,i,1),g)
+            imagen.itemset((j,i,2),r)
+    return imagen
+
+def sharpenTop(version):
+    img = imagen.copy()
+    print("cargando")
+    filtro = sharpen(version)
+    print("terminado")
+    imagenNueva = cv2.imwrite('final.jpg',filtro)
+    res = Toplevel(ventana)
+    res.geometry('800x800')
+    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
+    resultado = Label(res, text='Filtros resultante')
+    resultado.place(x=10, y=10)
+    labelImg = Label(res, image=imgf    )
+    labelImg.place(x=50, y = 50)
+    res.mainloop()
+
+def funSharpen():
+    top = Toplevel(ventana)
+    top.geometry('500x300')
+    
+    label = Label(top, text="Escoge el tamanio de la matriz")
+    label.place(x = 10, y= 10)
+    boton3 = Button(top, text = "3", command= lambda : [sharpenTop(3), top.destroy()])
+    boton3.place(x = 10, y= 60)
+    boton5 = Button(top, text = "5", command= lambda : [sharpenTop(5), top.destroy()])
+    boton5.place(x = 10, y= 110)
+
+
+def promedio(k):
+    y,x,d = imagen.shape
+    copia = imagen.copy()
+    for j in range(y):
+        for i in range(x):
+            if i-(k//2) < 0 or i+(k//2)+1>x:
+                        continue   
+            if j-(k//2) < 0 or j+(k//2)+1>y:
+                        continue
+            porcion = copia[j-(k//2):j+(k//2)+1,   i-(k//2):i+(k//2)+1 ]
+
+
+            
+
+            mul = (1/(k*k))*porcion
+            b,g,r = calSuma(mul)
+
+
+            minimo = min(b,g,r)
+            maximo = max(b,g,r)
+            if  minimo<0:
+                diferencia = -1 * minimo
+                b = b+diferencia
+                g = g+diferencia
+                r = r+diferencia            
+
+            if  maximo>255:
+                diferencia = maximo -255
+                b = b-diferencia
+                g = g-diferencia
+                r = r-diferencia
+
+            
+
+
+            imagen.itemset((j,i,0),b)
+            imagen.itemset((j,i,1),g)
+            imagen.itemset((j,i,2),r)
+
+    return imagen
+
+def promedioTop(version):
+    img = imagen.copy()
+    print("cargando")
+    filtro = mediana(version)
+    print("terminado")
+    imagenNueva = cv2.imwrite('final.jpg',filtro)
+    res = Toplevel(ventana)
+    res.geometry('800x800')
+    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
+    resultado = Label(res, text='Filtros resultante')
+    resultado.place(x=10, y=10)
+    labelImg = Label(res, image=imgf    )
+    labelImg.place(x=50, y = 50)
+    res.mainloop()
+
+def promedioFun():
+    top = Toplevel(ventana)
+    top.geometry('500x200')
+    
+    label = Label(top, text="Introduce la dimension de la matriz")
+    label.place(x = 10, y= 10)
+    boton3 = Button(top, text = "3", command= lambda : [medianaTop(3), top.destroy()])
+    boton3.place(x = 50, y= 60)
+    boton5 = Button(top, text = "5", command= lambda : [medianaTop(5), top.destroy()])
+    boton5.place(x = 100, y= 60)
+    boton7 = Button(top, text = "7", command= lambda : [medianaTop(7), top.destroy()])
+    boton7.place(x = 150, y= 60)
+    boton9 = Button(top, text = "9", command= lambda : [medianaTop(9), top.destroy()])
+    boton9.place(x = 200, y= 60)
+    boton11 = Button(top, text = "11", command= lambda : [medianaTop(11), top.destroy()])
+    boton11.place(x = 250, y= 60)
+
+def calMediana(matriz):
+    blue = 0
+    green = 0
+    red = 0
+    listaBlue = []
+    listaGreen = []
+    listared = []
+    for i in range(len(matriz)):
+        for j in range(len(matriz)):
+            listaBlue.append(matriz[i][j][0]) 
+            listaGreen.append(matriz[i][j][1]) 
+            listared.append(matriz[i][j][2]) 
+
+    blue = statistics.median(listaBlue) 
+    green = statistics.median(listaGreen)
+    red = statistics.median(listared)   
+
+    return blue, green, red
+
+def mediana(k):
+    y,x,d = imagen.shape
+    copia = imagen.copy()
+    for j in range(y):
+        for i in range(x):
+            if i-(k//2) < 0 or i+(k//2)+1>x:
+                        continue   
+            if j-(k//2) < 0 or j+(k//2)+1>y:
+                        continue
+            porcion = copia[j-(k//2):j+(k//2)+1,   i-(k//2):i+(k//2)+1 ]
+
+
+            
+
+            mul = porcion
+            b,g,r = calMediana(mul)
+
+
+            minimo = min(b,g,r)
+            maximo = max(b,g,r)
+            if  minimo<0:
+                diferencia = -1 * minimo
+                b = b+diferencia
+                g = g+diferencia
+                r = r+diferencia            
+
+            if  maximo>255:
+                diferencia = maximo -255
+                b = b-diferencia
+                g = g-diferencia
+                r = r-diferencia
+
+            
+
+
+            imagen.itemset((j,i,0),b)
+            imagen.itemset((j,i,1),g)
+            imagen.itemset((j,i,2),r)
+
+    return imagen
+
+def medianaTop(version):
+    img = imagen.copy()
+    print("cargando")
+    filtro = mediana(version)
+    print("terminado")
+    imagenNueva = cv2.imwrite('final.jpg',filtro)
+    res = Toplevel(ventana)
+    res.geometry('800x800')
+    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
+    resultado = Label(res, text='Filtros resultante')
+    resultado.place(x=10, y=10)
+    labelImg = Label(res, image=imgf    )
+    labelImg.place(x=50, y = 50)
+    res.mainloop()
+
+def medianaFun():
+    top = Toplevel(ventana)
+    top.geometry('500x200')
+    
+    label = Label(top, text="Introduce la dimension de la matriz")
+    label.place(x = 10, y= 10)
+    boton3 = Button(top, text = "3", command= lambda : [medianaTop(3), top.destroy()])
+    boton3.place(x = 50, y= 60)
+    boton5 = Button(top, text = "5", command= lambda : [medianaTop(5), top.destroy()])
+    boton5.place(x = 100, y= 60)
+    boton7 = Button(top, text = "7", command= lambda : [medianaTop(7), top.destroy()])
+    boton7.place(x = 150, y= 60)
+    boton9 = Button(top, text = "9", command= lambda : [medianaTop(9), top.destroy()])
+    boton9.place(x = 200, y= 60)
+    boton11 = Button(top, text = "11", command= lambda : [medianaTop(11), top.destroy()])
+    boton11.place(x = 250, y= 60)
+
+
+
+def emboss():
+    y,x,d = imagen.shape
+
+    copia = imagen.copy()
+    
+    
+    matrizS = [
+            [[-1,-1,-1],[-1,-1,-1],[0,0,0]],
+            [[-1,-1,-1],[0,0,0],[1,1,1]],
+            [[0,0,0],[1,1,1],[1,1,1]]
+            ]
+    
+    
+
+    matriz = np.array(matrizS)
+
+   
+
+    for j in range(y):
+        for i in range(x):
+            if i-(3//2) < 0 or i+(3//2)+1>x:
+                        continue   
+            if j-(3//2) < 0 or j+(3//2)+1>y:
+                        continue
+            porcion = copia[j-(3//2):j+(3//2)+1,   i-(3//2):i+(3//2)+1 ]
+            mul = matriz*porcion 
+            
+            b,g,r = calSuma(mul)
+
+            minimo = min(b,g,r)
+            maximo = max(b,g,r)
+            if  minimo<0:
+                diferencia = -1 * minimo
+                b = diferencia
+                g = diferencia
+                r = diferencia
+
+
+                
+
+            if  maximo>255:
+                diferencia = maximo -255
+                b = diferencia
+                g = diferencia
+                r = diferencia
+
+            
+            
+
+
+            imagen.itemset((j,i,0),b)
+            imagen.itemset((j,i,1),g)
+            imagen.itemset((j,i,2),r)
+    return imagen
+
+def embossTop():
+    img = imagen.copy()
+    print("cargando")
+    filtro = emboss()
+    print("terminado")
+    imagenNueva = cv2.imwrite('final.jpg',filtro)
+    res = Toplevel(ventana)
+    res.geometry('800x800')
+    imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
+    resultado = Label(res, text='Filtros resultante')
+    resultado.place(x=10, y=10)
+    labelImg = Label(res, image=imgf    )
+    labelImg.place(x=50, y = 50)
+    res.mainloop()
+
+
 def getImagen():
     """
     Funcion para crear una nueva pantalla y pedirle al usuario que introduzca el nombre del archivo a mostrar
@@ -350,9 +1004,10 @@ def getImagen():
     entradaNombre.place(x =50, y= 50 )
 
     
-    botonAceptar = Button(top, text='Aceptar', command= lambda : setImagen(entradaNombre.get()))
+    botonAceptar = Button(top, text='Aceptar', command= lambda : [setImagen(entradaNombre.get()), top.destroy()])
     botonAceptar.place(x = 50, y= 100) 
     
+
 
 def setImagen(nombreImg):
     """
@@ -372,15 +1027,12 @@ if __name__ == '__main__':
     El main de la aplicacion, aqui se muestran todos los botones que accionan las funcionallidades de la app
     """
     ventana = Tk()
-    ventana.geometry('1500x900')
+    ventana.geometry('1600x1000')
     titulo = Label(ventana, text='Filtros basicos Tarea 1')
     titulo.place(x = 620, y = 10)
 
     getImagen()
 
-
-    
-    
 
     labelImg = Label(ventana, text='hola')
     labelImg.place(x=500, y = 50)
@@ -429,7 +1081,36 @@ if __name__ == '__main__':
         contador = contador + 1
     botonBrillo = Button(ventana, text='Brillo', command= lambda: brilloFun())
     botonBrillo.place(x = 10, y = 50 + 40*(contador))
+    contador += 1
+    botonBlur = Button(ventana, text="Blur", command= lambda: blurTop() )
+    botonBlur.place(x= 10, y = 50 + 40*(contador))
+    contador += 1
+    botonMotion = Button(ventana, text="Motion Blur", command= lambda: motionFun() )
+    botonMotion.place(x= 10, y = 50 + 40*(contador))
+    contador += 1
+    botonFind = Button(ventana, text = "Find Edges", command= lambda: funFind())
+    botonFind.place(x=10, y= 50 + 40*contador  )
+    contador += 1
     
+    botonSharpen = Button(ventana, text="Sharpen", command= lambda: funSharpen())
+    botonSharpen.place(x = 10, y = 50 + 40*contador )
+
+    contador += 1
+    botonEmboss = Button(ventana, text="Emboss", command=lambda: embossTop())
+    botonEmboss.place(x = 10, y = 50 + 40*contador)
+
+
+    contador += 1
+    botonPromedio = Button(ventana , text="Promedio", command= lambda: promedioFun())
+    botonPromedio.place(x = 10, y = 50 + 40*contador)
+
+    contador += 1
+    botonMedianan = Button(ventana, text="mediana", command=lambda: medianaFun())
+    botonMedianan.place(x = 10, y = 50 + 40*contador)
+
+    contador += 1
+    botonMica = Button(ventana, text="mica", command=lambda: micaFun())
+    botonMica.place(x = 10, y = 50 + 40*contador)
 
     ventana.mainloop()
 
