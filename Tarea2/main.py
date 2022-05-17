@@ -1,5 +1,4 @@
-from curses.panel import bottom_panel
-from email.mime import image
+
 from tkinter import *
 import cv2
 import math
@@ -263,6 +262,10 @@ def brilloFun():
 
 
 def mica(b,g,r):
+    """
+    Funcion para hacer el filtro de la mica dependiendo de los valores RGB
+    """
+
     y,x,d = imagen.shape
     copia = imagen.copy()
     for j in range(y):
@@ -273,6 +276,9 @@ def mica(b,g,r):
     return copia
 
 def micaTop(b,g,r):
+    """
+    Funcion para guardar el filtro de la mica y sacar la ventana emergente para poder meter los datos
+    """
     filtro = mica(b,g,r)
     cv2.imwrite('final.jpg',filtro)
     abreResultante()
@@ -280,7 +286,7 @@ def micaTop(b,g,r):
 
 def micaFun():
     """
-    Funcion para mostrar la pantalla con la opcion para modificar el brillo
+    Funcion para mostrar la pantalla con la opcion para modificar los datos de la mica
     """
     top = Toplevel(ventana)
     top.geometry('400x800')
@@ -308,6 +314,9 @@ def micaFun():
 
 
 def calSuma(matriz):
+    """
+    Funcion para sumar los valores rgb dada una matriz de pixeles
+    """
     blue = 0
     green = 0
     red = 0
@@ -320,6 +329,9 @@ def calSuma(matriz):
     return blue, green, red
 
 def blur():
+    """
+    Funcion para calcular el filtro de Blur
+    """
     x,y,d = imagen.shape
     copia = imagen.copy()
 
@@ -350,12 +362,19 @@ def blur():
 
 
 def blurTop():
+    """
+    Funcion para guardar y mostrar el resulado del filtro
+    """
     filtro = blur()
     cv2.imwrite('final.jpg',filtro)
     abreResultante()
     
 
 def mediaFun():
+    """
+    Funcion para mostrar las opcion de la matriz que se quiere en el filtro de la media
+    """
+
     top = Toplevel(ventana)
     top.geometry('500x200')
     
@@ -374,11 +393,17 @@ def mediaFun():
 
 
 def mediaTop():
+    """
+    Funcion para aplicar el filtro de la media y mostrarlo
+    """
     filtro = mediana()
     cv2.imwrite('final.jpg',filtro)
     abreResultante()
 
 def motionBlur(k):
+    """
+    Funcion para aplicar el filtro de motion blur dado el tamanio de la matriz k
+    """
     x,y,d = imagen.shape
     copia = imagen.copy()
     resultante = imagen.copy()
@@ -419,11 +444,17 @@ def motionBlur(k):
 
 
 def motionTop(tamanio):
+    """
+    Funcion para guardar y mostrar el filtro de motion blur
+    """
     filtro = motionBlur(tamanio)
     cv2.imwrite('final.jpg',filtro)
     abreResultante()
 
 def motionFun():
+    """
+    Funcion para mostrar las opcion del filtro de motion blur
+    """
     top = Toplevel(ventana)
     top.geometry('500x200')
     
@@ -441,6 +472,11 @@ def motionFun():
     boton11.place(x = 250, y= 60)
 
 def findEdges(version):
+    """
+    Funcion para calcular el filtro de buscar las aristas dada la version si es el de vertical, horizontal,
+    noventa grados o en todas las direcciones.
+    """
+
     y,x,d = imagen.shape
     copia = imagen.copy()
 
@@ -545,11 +581,18 @@ def findEdges(version):
     return copia
 
 def funTop(version):
+    """
+    Funcion para guardar y mostrar el litro de encontrar aristas
+    """
     filtro = findEdges(version)
     cv2.imwrite('final.jpg',filtro)
     abreResultante()
     
 def abreResultante():
+    """
+    Funcion para mostrar el resultado de aplicar alguno de los filtros
+    """
+
     res = Toplevel(ventana)
     res.geometry('800x800')
     imgf = ImageTk.PhotoImage(Image.open('final.jpg'))
@@ -561,6 +604,9 @@ def abreResultante():
 
 
 def funFind():
+    """
+    Funcion para mostrar las opciones para el filtro de buscar aristas
+    """
     top = Toplevel(ventana)
     top.geometry('500x300')
     
@@ -577,6 +623,9 @@ def funFind():
 
 
 def sharpen(version):
+    """
+    Funcion para calcular el filtro sharpen
+    """
     y,x,d = imagen.shape
 
     copia = imagen.copy()
@@ -637,11 +686,17 @@ def sharpen(version):
     return copia
 
 def sharpenTop(version):
+    """
+    Funcion para guardar el archivo de sharpen 
+    """
     filtro = sharpen(version)
     cv2.imwrite('final.jpg',filtro)
     abreResultante()
 
 def funSharpen():
+    """
+    Funcion para mostrar las opciones del filtro sharpen
+    """
     top = Toplevel(ventana)
     top.geometry('500x300')
     
@@ -654,6 +709,9 @@ def funSharpen():
 
 
 def promedio(k):
+    """
+    Funcion para calcular el filtro promedio
+    """
     y,x,d = imagen.shape
     copia = imagen.copy()
     for j in range(y):
@@ -689,11 +747,17 @@ def promedio(k):
     return copia
 
 def promedioTop(version):
+    """
+    Funcion para guardar el resultado del filtro promedio
+    """
     filtro = mediana(version)
     cv2.imwrite('final.jpg',filtro)
     abreResultante
 
 def promedioFun():
+    """
+    Funcion para mostrar las opciones para calcular el filtro promedio
+    """
     top = Toplevel(ventana)
     top.geometry('500x200')
     
@@ -711,6 +775,9 @@ def promedioFun():
     boton11.place(x = 250, y= 60)
 
 def calMediana(matriz):
+    """
+    Funcion para calcular la mediana dada una matriz
+    """
     blue = 0
     green = 0
     red = 0
@@ -730,6 +797,9 @@ def calMediana(matriz):
     return blue, green, red
 
 def mediana(k):
+    """
+    Funcion para calcular el filtro de la mediana
+    """
     y,x,d = imagen.shape
     copia = imagen.copy()
     for j in range(y):
@@ -768,11 +838,17 @@ def mediana(k):
     return copia
 
 def medianaTop(version):
+    """
+    Funcion para guardar el filtro mediana
+    """
     filtro = mediana(version)
     cv2.imwrite('final.jpg',filtro)
     abreResultante()
 
 def medianaFun():
+    """
+    Funcion para mostrar las opciones del filtro mediana
+    """
     top = Toplevel(ventana)
     top.geometry('500x200')
     
@@ -792,6 +868,9 @@ def medianaFun():
 
 
 def emboss():
+    """
+    Funcion para calcular el filtro emboss
+    """
     y,x,d = imagen.shape
 
     copia = imagen.copy()
@@ -830,6 +909,9 @@ def emboss():
     return copia
 
 def embossTop():
+    """
+    Funcion para guardar el filtro de emboss
+    """
     filtro = emboss()
     cv2.imwrite('final.jpg',filtro)
     abreResultante()

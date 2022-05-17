@@ -1,26 +1,8 @@
-from email.mime import image
 import numpy as np
 import cv2
 
-def blending(img1, img2, porcentaje):
-    y1,x1,d1 = img1.shape
-    y2,x2,d2 = img2.shape
 
-    print(x1,y1)
-    print(x2,y2)
-
-
-    for j in range(y1):
-        for i in range(x1):
-            b = (img1[j,i,0]*porcentaje) + ((img2[j,i,0])*(1-porcentaje))
-            g = (img1[j,i,1]*porcentaje) + ((img2[j,i,1])*(1-porcentaje))
-            r = (img1[j,i,2]*porcentaje) + ((img2[j,i,2])*(1-porcentaje))
-
-            img1[j,i] = [b,g,r]
-
-    return img1
-
-def quiarMarca(imagen, porcentaje):
+def quiarMarca(imagen):
     y,x,d = imagen.shape
     
     for j in range(y):
@@ -34,7 +16,6 @@ def quiarMarca(imagen, porcentaje):
             resta2 = lista[1]- lista[2]
             if abs(resta) + abs(resta2) < 10:
                 continue
-            
             
             valor = int(imagen[j,i,0]) * int(imagen[j,i,1]) * int(imagen[j,i,2])
 
@@ -101,13 +82,7 @@ def quiarMarca(imagen, porcentaje):
 
 
 if __name__ == "__main__":
-    #img1 = cv2.imread("r1.jpg")
-    #img2 = cv2.imread("imgr.jpg")
-
-    img = cv2.imread("r2.jpg")
-
-    filtro = quiarMarca(img,0.6)
-
-    
-    #filtro =  blending(img1, img2, 0.375)
+    imagen = input("introduce el nombre del la imagen a quitar el filtro\n")
+    img = cv2.imread("{}.jpg".format(imagen))
+    filtro = quiarMarca(img)
     cv2.imwrite('final.jpg',filtro)
