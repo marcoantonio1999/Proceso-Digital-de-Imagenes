@@ -1,8 +1,13 @@
 from random import randint, random
 import numpy as np
 import cv2
+from tkinter import *
+from PIL import Image, ImageTk
 
-def dilteringAleatorio(img):
+
+
+def dilteringAleatorio():
+    img = imagenGris.copy()
     y,x = img.shape
 
     for j in range(y):
@@ -117,9 +122,9 @@ def aplicaMatriz(porcion,version):
 
     
 
-def diltering(img, version):
+def diltering( version):
+    img = imagenGris.copy
     y,x = img.shape
-
     for j in range(y):
         for i in range(x):
             if (j+1)*3 > y or (i+1)*3>x:
@@ -136,11 +141,49 @@ def diltering(img, version):
 
 
 
+def getImagen():
+    """
+    Funcion para crear una nueva pantalla y pedirle al usuario que introduzca el nombre del archivo a mostrar
+    """
+    top = Toplevel(ventana)
+    top.geometry('300x200')
+    labelCargar = Label(top, text="Introduce el nombre del archivo")
+    labelCargar.place(x=10, y = 10 )
+    entradaNombre = Entry(top)
+    entradaNombre.place(x =50, y= 50 )
+    botonAceptar = Button(top, text='Aceptar', command= lambda : [setImagen(entradaNombre.get()), top.destroy()])
+    botonAceptar.place(x = 50, y= 100) 
+    
+
+
+def setImagen(nombreImg):
+    """
+    Funcion para poder configurar la imagen segun el nombre que se le asigno y poder verlo en pantalla
+    """
+    imgen = nombreImg+'.jpg'
+    im = Image.open(imgen)
+    ph = ImageTk.PhotoImage(im)
+    global labelImgO
+    labelImgO = Label(ventana, image=ph)
+    labelImgO.image=ph
+    labelImgO.place(x=250,y=150)
+    global imagenGris
+    imgG = cv2.imread(imgen)
+    imagenGris = cv2.cvtColor(imgG, cv2.COLOR_BGR2GRAY)
+
+
 
 
 if __name__ == '__main__':
-    imgO = cv2.imread("al1.jpg")
-    imgGrises = cv2.cvtColor(imgO, cv2.COLOR_BGR2GRAY)
-    filtro = diltering(imgGrises,'disperso')
-    cv2.imwrite("final.jpg", filtro)
+    ventana = Tk()
+    ventana.geometry("1500x1500")
+    getImagen()
+    botonAleatorio = Button(ventana, text="Diltering Aleatorio", command= lambda: dilteringAleatorio())
+    botonAleatorio.place(x= 10, y=10)
+    botonOrdenado = Button(ventana, text="Diltering Ordenado", command= lambda: diltering("ordenado"))
+    botonOrdenado.place(x= 10, y=60)
+    botonDisperso = Button(ventana, text="Diltering Dipserso", command= lambda: diltering("disperso"))
+    botonDisperso.place(x= 10, y=110)
+
+    ventana.mainloop()
     

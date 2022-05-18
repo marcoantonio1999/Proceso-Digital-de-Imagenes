@@ -82,7 +82,7 @@ def acuarela(k):
     labelImg = Label(ventana, image=ph)
     labelImg.image=ph
     labelImg.place(x=250,y=150)
-
+    
 
 
 
