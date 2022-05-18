@@ -17,7 +17,16 @@ def dilteringAleatorio():
                 img[j,i] = 255
             else:
                 img[j,i] = 0
-    return img
+    cv2.imwrite("final.jpg", img)
+
+    imgFinalRescalada = cv2.resize(img, (1000,1000))
+    cv2.imwrite("FinalRescalada.jpg", imgFinalRescalada)
+    labelImgO.destroy()
+    im = Image.open("FinalRescalada.jpg")
+    ph = ImageTk.PhotoImage(im)
+    labelImg = Label(ventana, image=ph)
+    labelImg.image=ph
+    labelImg.place(x=250,y=50)
 
 def aplicaMatriz(porcion,version):
 
@@ -123,7 +132,7 @@ def aplicaMatriz(porcion,version):
     
 
 def diltering( version):
-    img = imagenGris.copy
+    img = imagenGris.copy()
     y,x = img.shape
     for j in range(y):
         for i in range(x):
@@ -137,7 +146,16 @@ def diltering( version):
             if version == 'disperso':
                 nuevoPedazo = aplicaMatriz(pedazo,2)
             img[j*3:(j+1)*3, i*3: (i+1)*3] = nuevoPedazo
-    return img
+    cv2.imwrite("final.jpg", img)
+
+    imgFinalRescalada = cv2.resize(img, (1000,1000))
+    cv2.imwrite("FinalRescalada.jpg", imgFinalRescalada)
+    labelImgO.destroy()
+    im = Image.open("FinalRescalada.jpg")
+    ph = ImageTk.PhotoImage(im)
+    labelImg = Label(ventana, image=ph)
+    labelImg.image=ph
+    labelImg.place(x=250,y=50)
 
 
 
