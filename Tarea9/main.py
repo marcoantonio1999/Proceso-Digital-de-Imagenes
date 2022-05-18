@@ -7,6 +7,9 @@ from PIL import Image, ImageTk
 
 
 def dilteringAleatorio():
+    """
+    Funcion que calcula el filtro aleootrio del diltering
+    """
     img = imagenGris.copy()
     y,x = img.shape
 
@@ -30,7 +33,9 @@ def dilteringAleatorio():
 
 def aplicaMatriz(porcion,version):
 
-    
+    """"
+    Funcion que calcula la matriz de diltering a una porcion de una imagen
+    """
 
     if version == 1:
         if porcion[0,0]/28 > 8:
@@ -132,6 +137,9 @@ def aplicaMatriz(porcion,version):
     
 
 def diltering( version):
+    """
+    Funcion que calcula el filtro de diltering disperso o ordenado
+    """
     img = imagenGris.copy()
     y,x = img.shape
     for j in range(y):
