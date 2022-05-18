@@ -1,19 +1,58 @@
 import cv2
 import numpy as np
 import math
+from tkinter import *
+from PIL import Image, ImageTk
 
-def promedio(img):
-    y,x = img.shape
+
+def promedio(imgp):
+    """
+    Funcion para sacar el promedio de los griss dedo una porcion de una imagen
+    """
+    y,x = imgp.shape
     
     suma = 0
     for j in range(y):
         for i in range(x):
-            suma += img[j,i]         
+            suma += imgp[j,i]         
     prom = suma/(y*x)
     return prom 
 
-if __name__ == "__main__":
-    imagen = cv2.imread("caja.jpg")
+def getImagen():
+    """
+    Funcion para crear una nueva pantalla y pedirle al usuario que introduzca el nombre del archivo a mostrar
+    """
+    top = Toplevel(ventana)
+    top.geometry('300x200')
+    labelCargar = Label(top, text="Introduce el nombre del archivo")
+    labelCargar.place(x=10, y = 10 )
+    entradaNombre = Entry(top)
+    entradaNombre.place(x =50, y= 50 )
+    botonAceptar = Button(top, text='Aceptar', command= lambda : [setImagen(entradaNombre.get()), top.destroy()])
+    botonAceptar.place(x = 50, y= 100) 
+    
+
+
+def setImagen(nombreImg):
+    """
+    Funcion para poder configurar la imagen segun el nombre que se le asigno y poder verlo en pantalla
+    """
+    imgen = nombreImg+'.jpg'
+    im = Image.open(imgen)
+    ph = ImageTk.PhotoImage(im)
+    labelImg = Label(ventana, image=ph)
+    labelImg.image=ph
+    labelImg.place(x=250,y=150)
+    global imgG
+    imgG = cv2.imread(imgen)
+    
+def recursivo():
+    """
+    Funcion para calcular el filtro recursivo
+
+    """
+    imagen = imgG.copy()
+
     x,y,d = imagen.shape
     w = int(x/4)
     h = int(y/4)
@@ -88,11 +127,6 @@ if __name__ == "__main__":
         imagenesConcatX.append(imagenesConcat)
         
     
-
-    
-    print(len(imagenesConcatX))
-    print(len(imagenesConcatX[0]))
-    
     for k in range(len(imagenesConcatX[0])):
         imgNuevo = cv2.vconcat(imagenesConcatX[k])
         cv2.imwrite("finalY{}.jpg".format(k+1), imgNuevo)
@@ -105,4 +139,23 @@ if __name__ == "__main__":
 
     imgFinal = cv2.hconcat(listay)
     cv2.imwrite("Final.jpg", imgFinal)
-    
+
+    imgFinalRescalada = cv2.resize(imgFinal, (1000,1000))
+    cv2.imwrite("FinalRescalada.jpg", imgFinalRescalada)
+
+
+    im = Image.open("FinalRescalada.jpg")
+    ph = ImageTk.PhotoImage(im)
+    labelImg = Label(ventana, image=ph)
+    labelImg.image=ph
+    labelImg.place(x=250,y=150)
+
+if __name__ == "__main__":
+
+    ventana = Tk()
+    ventana.geometry("1500x1500")
+    getImagen()
+    botonRecursivo = Button(ventana, text="Aplicar filtro", command= lambda: recursivo())
+    botonRecursivo.place(x= 10, y=10)
+
+    ventana.mainloop()
